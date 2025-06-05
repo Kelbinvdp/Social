@@ -1,0 +1,216 @@
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Galería de Imágenes con Efecto de Libro</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+                overflow: hidden;
+                background-color: #000;
+            }
+
+            .book-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                perspective: 2000px;
+            }
+
+            .page {
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                transform-style: preserve-3d;
+                transition: transform 1s;
+                backface-visibility: hidden;
+            }
+
+            .page img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                background-color: #000;
+            }
+
+            .page.prev {
+                transform: rotateY(-180deg);
+                z-index: 1;
+            }
+
+            .page.current {
+                transform: rotateY(0deg);
+                z-index: 2;
+            }
+
+            .page.next {
+                transform: rotateY(180deg);
+                z-index: 1;
+            }
+
+            .navigation {
+                position: fixed;
+                bottom: 20px;
+                width: 100%;
+                display: flex;
+                justify-content: center;
+                z-index: 10;
+            }
+
+            .nav-btn {
+                background-color: rgba(255, 255, 255, 0.5);
+                border: none;
+                color: #000;
+                padding: 10px 20px;
+                margin: 0 10px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+                transition: background-color 0.3s;
+            }
+
+            .nav-btn:hover {
+                background-color: rgba(255, 255, 255, 0.8);
+            }
+
+            .page-counter {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                color: white;
+                background-color: rgba(0, 0, 0, 0.5);
+                padding: 5px 10px;
+                border-radius: 5px;
+                z-index: 10;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="book-container">
+            <!-- Las páginas se agregarán dinámicamente con JavaScript -->
+        </div>
+
+        <div class="page-counter">1 / 5</div>
+
+        <div class="navigation">
+            <button class="nav-btn" id="prev-btn">Anterior</button>
+            <button class="nav-btn" id="next-btn">Siguiente</button>
+        </div>
+
+        <script>
+            // Array de imágenes (reemplaza con tus propias imágenes)
+            const images = [
+                'https://i.postimg.cc/VNjxyz5m/logohoteltotem.png',
+                'https://i.postimg.cc/cHx5VYVB/paquetessociales.png',
+
+            ];
+
+            let currentIndex = 0;
+            const bookContainer = document.querySelector('.book-container');
+            const pageCounter = document.querySelector('.page-counter');
+
+            // Crear páginas del libro
+            function createPages() {
+                bookContainer.innerHTML = '';
+
+                // Página anterior (si existe)
+                if (currentIndex > 0) {
+                    const prevPage = document.createElement('div');
+                    prevPage.className = 'page prev';
+                    prevPage.innerHTML = `<img src="${images[currentIndex - 1]}" alt="Imagen ${currentIndex}">`;
+                    bookContainer.appendChild(prevPage);
+                }
+
+                // Página actual
+                const currentPage = document.createElement('div');
+                currentPage.className = 'page current';
+                currentPage.innerHTML = `<img src="${images[currentIndex]}" alt="Imagen ${currentIndex + 1}">`;
+                bookContainer.appendChild(currentPage);
+
+                // Página siguiente (si existe)
+                if (currentIndex < images.length - 1) {
+                    const nextPage = document.createElement('div');
+                    nextPage.className = 'page next';
+                    nextPage.innerHTML = `<img src="${images[currentIndex + 1]}" alt="Imagen ${currentIndex + 2}">`;
+                    bookContainer.appendChild(nextPage);
+                }
+
+                // Actualizar contador
+                pageCounter.textContent = `${currentIndex + 1} / ${images.length}`;
+            }
+
+            // Navegación
+            document.getElementById('prev-btn').addEventListener('click', () => {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    createPages();
+                }
+            });
+
+            document.getElementById('next-btn').addEventListener('click', () => {
+                if (currentIndex < images.length - 1) {
+                    currentIndex++;
+                    createPages();
+                }
+            });
+
+            // Navegación con teclado
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        createPages();
+                    }
+                } else if (e.key === 'ArrowRight') {
+                    if (currentIndex < images.length - 1) {
+                        currentIndex++;
+                        createPages();
+                    }
+                }
+            });
+
+            // Navegación con gestos táctiles (para dispositivos móviles)
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            document.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, false);
+
+            document.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, false);
+
+            function handleSwipe() {
+                if (touchEndX < touchStartX - 50) {
+                    // Deslizar a la izquierda (siguiente imagen)
+                    if (currentIndex < images.length - 1) {
+                        currentIndex++;
+                        createPages();
+                    }
+                } else if (touchEndX > touchStartX + 50) {
+                    // Deslizar a la derecha (imagen anterior)
+                    if (currentIndex > 0) {
+                        currentIndex--;
+                        createPages();
+                    }
+                }
+            }
+
+            // Inicializar
+            createPages();
+        </script>
+    </body>
+    </html>
